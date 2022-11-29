@@ -25,13 +25,18 @@ import { Navigate } from "react-router-dom";
       measurementId: "G-6028WEKYST"
   };
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+  const firebase = initializeApp(firebaseConfig);
+  const auth = getAuth(firebase);
+  const db = getFirestore(firebase);
   const googleProvider = new GoogleAuthProvider();
+  googleProvider.addScope('https://www.googleapis.com/auth/drive.file')
   const signInWithGoogle = async () => {
     try {
       const res = await signInWithPopup(auth, googleProvider);
+
+      const credentials = GoogleAuthProvider.credentialFromResult(res);
+      const token = credentials.accessToken;
+      
       const user = res.user;
       const q = query(collection(db, "users"), where("uid", "==", user.uid));
       const docs = await getDocs(q);
@@ -41,6 +46,7 @@ import { Navigate } from "react-router-dom";
           name: user.displayName,
           authProvider: "google",
           email: user.email,
+          accessToken: token,
         });
       }
     } catch (err) {
