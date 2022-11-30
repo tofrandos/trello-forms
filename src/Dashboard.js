@@ -9,7 +9,7 @@ import { gapi } from "gapi-script";
 function Dashboard() {
   const [user, loading, error] = useAuthState(auth);
   const [name, setName] = useState("");
-  const [token, setToken] = useState('');
+  const [form, setForm] = useState("");
   const navigate = useNavigate();
   
   const fetchUserName = async () => {
@@ -26,43 +26,55 @@ function Dashboard() {
 
   const getForm = async (formID) => {
 
+    var data = "";
+
     try {
       const q = query(collection(db, "users"), where("uid", "==", user.uid));
       const doc = await getDocs(q);
-      const data = doc.docs[0].data();
-      setToken(data.accessToken);
+      data = doc.docs[0].data();
     } catch (err) {
       console.error(err);
-      alert("An error occured while fetching user data");
+      alert("An error occured while fetching token");
     }
 
-    fetch('https://forms.googleapis.com/v1/forms/'+formID,
+    //var response;
+
+    fetch(`https://forms.googleapis.com/v1/forms/${formID}/`,
     {
       method: "GET",
-      headers: new Headers({'Authorization': 'Bearer '+ token})
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + data.accessToken
+      }
     }).then( (res) => {
       return res.json();
-    }).then( function(val) {
-      console.log(val);
+    }).then( function(response){
+      setForm(response);
+      //console.log(response);
     })
+
+    
   }
 
+  useState(() => {
+    getForm("1zoVckMu2d2XJ-wCsOrBqto3A01qQYvjHMqpsiP-lNA8");
+  })
   
   useEffect(() => {
     if (loading) return;
     if (!user) return navigate("/");
 
     fetchUserName();
-    getForm("1zoVckMu2d2XJ-wCsOrBqto3A01qQYvjHMqpsiP-lNA8");
+    //console.log(form);
 
-
-
-  }, [user, loading]);
+  }, [user, loading, form]);
   return (
     <div className="dashboard">
        <div className="dashboard__container">
         Logged in as
         <div>{name}</div>
+        <div>{}</div>
          <button className="dashboard__btn" onClick={logout}>
           Logout
          </button>

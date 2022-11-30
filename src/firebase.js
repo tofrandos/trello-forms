@@ -29,7 +29,8 @@ import { Navigate } from "react-router-dom";
   const auth = getAuth(firebase);
   const db = getFirestore(firebase);
   const googleProvider = new GoogleAuthProvider();
-  googleProvider.addScope('https://www.googleapis.com/auth/drive.file')
+  googleProvider.addScope('https://www.googleapis.com/auth/drive')
+  googleProvider.addScope('https://www.googleapis.com/auth/forms.responses.readonly');
   const signInWithGoogle = async () => {
     try {
       const res = await signInWithPopup(auth, googleProvider);
